@@ -1,6 +1,7 @@
 <template>
   <div id="search">
-    <h1>{{title}}</h1>
+    <h1 v-if="listingCount === 0">{{title}}</h1>
+    <h1 v-else>{{titleEmpty}}</h1>
     <form>
       <input type="text" v-model="q">
       <button
@@ -13,29 +14,23 @@
 </template>
 
 <script>
+import { mapActions, mapState } from "vuex";
+
 export default {
-  name: 'Search',
+  name: "Search",
   data() {
     return {
-      title: 'Search for houses and flats for sale across the UK',
-      q: '',
+      title: "Search for houses and flats for sale across the UK",
+      titleEmpty: "No results found",
+      q: "",
     };
   },
   methods: {
-    submit() {
-      fetch("https://property-search-jlrslqbnta.now.sh/search", { q: this.q })
-        .then(response => {
-          if (!response.ok) {
-            console.error('wrongsearch');
-            
-          }
-          return response;
-        })
-        .then(response => {
-          console.error(response.text());
-        });
-    },
+    ...mapActions(["fetchSearchResults"]),
   },
+  computed: mapState({
+    listingCount: ({ listingCount }) => listingCount,
+  }),
 };
 </script>
 
