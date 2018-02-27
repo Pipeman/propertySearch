@@ -1,15 +1,15 @@
 <template>
   <div id="search">
-    <h1 v-if="listingCount === 0">{{title}}</h1>
+    {{searchCounter}}
+    <h1 v-if="!searchCounter">{{title}}</h1>
     <h1 v-else>{{titleEmpty}}</h1>
     <form>
       <input type="text" v-model="q">
       <button
         type="submit"
-        @click="submit"
+        @click="fetchSearchResults({ area: q })"
       >Search</button>
     </form>
-
   </div>
 </template>
 
@@ -29,7 +29,7 @@ export default {
     ...mapActions(["fetchSearchResults"]),
   },
   computed: mapState({
-    listingCount: ({ listingCount }) => listingCount,
+    searchCounter: ({ searchCounter }) => searchCounter,
   }),
 };
 </script>

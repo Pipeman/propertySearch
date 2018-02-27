@@ -27,7 +27,7 @@ describe("mutations", function() {
         listing: [],
       };
       this.newListing = ["a", "b", "c"];
-      mutations.updateListing(this.state, this.newListing);
+      mutations.updateListing(this.state, { newListing: this.newListing });
     });
 
     it("should update the listing in state", function() {
@@ -41,7 +41,7 @@ describe("mutations", function() {
         listingCount: 0,
       };
       this.newListingCount = 4;
-      mutations.updateListingCount(this.state, this.newListingCount);
+      mutations.updateListingCount(this.state, { newListingCount: this.newListingCount });
     });
 
     it("should update the listing count in state", function() {
@@ -55,11 +55,37 @@ describe("mutations", function() {
         area: "",
       };
       this.newArea = "C4N3";
-      mutations.updateArea(this.state, this.newArea);
+      mutations.updateArea(this.state, { newArea: this.newArea });
     });
 
     it("should update the listing count in state", function() {
       expect(this.state.area).to.be.equal(this.newArea);
+    });
+  });
+
+  describe("incrementSearchCounter", function() {
+    beforeEach(function() {
+      this.state = {
+        searchCounter: 0,
+      };
+      mutations.incrementSearchCounter(this.state);
+    });
+
+    it("should update the search counter in state", function() {
+      expect(this.state.searchCounter).to.be.equal(1);
+    });
+  });
+
+  describe("resetSearchCounter", function() {
+    beforeEach(function() {
+      this.state = {
+        searchCounter: 120,
+      };
+      mutations.resetSearchCounter(this.state);
+    });
+
+    it("should reset the search counter in state", function() {
+      expect(this.state.searchCounter).to.be.equal(0);
     });
   });
 });
@@ -76,11 +102,11 @@ describe("actions", function() {
       expect(getPropertiesForAreaSpy.calledWith("N11")).to.be.true;
     });
 
-    it("should call the updateListing mutation", function() {
-      return actions.fetchSearchResults({ commit: this.mockCommit }, { area: this.area })
-        .then(() => {
+    it("should call the updateListing mutation", async function() {
+      await actions.fetchSearchResults({ commit: this.mockCommit }, { area: this.area })
+        // .then(() => {
           expect(this.mockCommit.calledWith("updateListing", { newListing: mockedListing })).to.be.true;
-        });
+        // });
     });
 
     it("should call the updateListingCount mutation", function() {

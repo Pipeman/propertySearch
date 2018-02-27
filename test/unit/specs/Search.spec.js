@@ -1,76 +1,70 @@
 import Vue from "vue";
+import Vuex from "vuex";
+import { mount } from "avoriaz";
 import sinon from "sinon";
+import Search from "../../../src/components/Search";
 // eslint-disable-next-line
-const Search = require("!!vue-loader?inject!../../../src/components/Search.vue");
+// const Search = require("!!vue-loader?inject!../../../src/components/Search.vue");
 
-const fetchSearchResultsSpy = sinon.stub();
-fetchSearchResultsSpy.withArgs("N11")
-  .returns(
-    Promise.resolve(
-      {
-        search_results: 1,
-        area: "N11",
-        listing: [{}],
-      },
-    ),
-  );
-fetchSearchResultsSpy.returns(
-  Promise.resolve(
-    {
-      search_results: 0,
-      area: "",
-      listing: [],
-    },
-  ),
-);
-const SearchWithMocks = Search({
-  "../store/store": {
-    fetchSearchResults: fetchSearchResultsSpy,
-  },
-});
+Vue.use(Vuex);
 
 beforeEach(function() {
-  const Constructor = Vue.extend(SearchWithMocks);
-  this.vm = new Constructor().$mount();
+  this.actions = {
+    fetchSearchResults: sinon.spy(),
+  };
+  this.store = new Vuex.Store({
+    state: {
+      searchCounter: 0,
+    },
+    actions: this.actions,
+  });
+  this.wrapper = mount(Search, { store: this.store });
+  this.title = this.wrapper.find("h1")[0];
+  this.input = this.wrapper.find("input")[0];
+  this.button = this.wrapper.find("button")[0];
 });
 
-describe.only("Search.vue", () => {
+describe("Search.vue", () => {
   it("should render correct contents", function() {
-    expect(this.vm.$el.querySelector("h1").textContent)
+    expect(this.title.text())
       .to.equal("Search for houses and flats for sale across the UK");
-    expect(this.vm.$el.querySelector("input")).to.exist;
-    expect(this.vm.$el.querySelector("button").textContent).to.equal("Search");
+    expect(this.input).to.exist;
+    expect(this.button.text()).to.equal("Search");
   });
 
   describe("when the search button is pressed", () => {
     beforeEach(function() {
-      this.vm.$el.querySelector("input").value = "N11";
-      this.vm.$el.querySelector("input").dispatchEvent(new Event("input"));
-      this.vm.$el.querySelector("button").click();
+      this.input.element.value = "N11";
+      this.input.trigger("input");
+      this.button.trigger("click");
     });
 
-    it("should call search service", () => {
-      expect(fetchSearchResultsSpy.called).to.be.true;
-      expect(fetchSearchResultsSpy.calledWith("N11")).to.be.true;
+    it("should call search service", function() {
+      expect(this.actions.fetchSearchResults.called).to.be.true;
     });
   });
 
   describe("when the search return 0 results", () => {
     beforeEach(function() {
-      this.vm.$el.querySelector("input").value = "SE1";
-      this.vm.$el.querySelector("input").dispatchEvent(new Event("input"));
-      this.vm.$el.querySelector("button").click();
+      this.store = new Vuex.Store({
+        state: {
+          searchCounter: 1,
+        },
+        actions: this.actions,
+      });
+      this.wrapper = mount(Search, { store: this.store });
+      this.title = this.wrapper.find("h1")[0];
+      this.input = this.wrapper.find("input")[0];
+      this.button = this.wrapper.find("button")[0];
     });
 
     it("should display search input and button", function() {
-      expect(this.vm.$el.querySelector("input")).to.exist;
-      expect(this.vm.$el.querySelector("button").textContent).to.equal("Search");
+      expect(this.input).to.exist;
+      expect(this.button.text()).to.equal("Search");
     });
 
-    it("should display a no reults message", function(done) {
-      done();
-      expect(this.vm.$el.querySelector("h1").textContent)
-        .to.equal("No results found");
+    it("should display a no reults message", function() {
+      expect(this.title.text()).to.equal("No results found");
     });
   });
 });
